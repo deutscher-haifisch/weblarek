@@ -8,8 +8,9 @@ import { CartModel } from './components/Models/CartModel';
 import { BuyerModel } from './components/Models/BuyerModel';
 import { LarekApi } from './components/Models/LarekApi';
 import { Api } from './components/base/Api';
+import { API_URL } from './utils/constants'; 
 import { apiProducts } from './utils/data';
-import { IProduct, IOrder } from './types/index';
+import { IOrder } from './types/index';
 
 // ============================================
 // 1. ТЕСТИРОВАНИЕ МОДЕЛЕЙ ДАННЫХ
@@ -97,10 +98,10 @@ console.log('\n========== РАБОТА С СЕРВЕРОМ ==========');
 console.log('1. СОЗДАНИЕ КЛАССА ДЛЯ СВЯЗИ С СЕРВЕРОМ');
 console.log('----------------------------------------');
 
-const api = new Api('https://larek-api.nomoreparties.co/api', {
+const api = new Api(API_URL, {
     headers: { 'Content-Type': 'application/json' }
 });
-console.log('Api создан, baseUrl:', (api as any).baseUrl);
+console.log('Api создан');
 
 const larekApi = new LarekApi(api);
 console.log('LarekApi создан');
@@ -116,60 +117,55 @@ async function testServerRequests() {
     
     try {
         const products = await larekApi.getProductList();
+        console.log('Запрос выполнен успешно');
+        console.log('Получено товаров:', products.length);
         
-        if (products && products.length > 0) {
-            console.log('Запрос выполнен успешно');
-            console.log('Получено товаров:', products.length);
-            
-            serverCatalog.setProducts(products);
-            console.log('Массив сохранен в модель CatalogModel');
-            
-            console.log('\nМАССИВ ТОВАРОВ ИЗ МОДЕЛИ:');
+        serverCatalog.setProducts(products);
+        console.log('Массив сохранен в модель CatalogModel');
+        
+        console.log('\nМАССИВ ТОВАРОВ ИЗ МОДЕЛИ:');
+        console.log('----------------------------------------');
+        const savedProducts = serverCatalog.getProducts();
+        
+        savedProducts.forEach((product, index) => {
+            console.log(`${index + 1}. ${product.title}`);
+            console.log(`   ID: ${product.id}`);
+            console.log(`   Категория: ${product.category}`);
+            console.log(`   Цена: ${product.price !== null ? product.price + '₽' : 'бесценно'}`);
+            console.log(`   Описание: ${product.description.substring(0, 50)}...`);
             console.log('----------------------------------------');
-            const savedProducts = serverCatalog.getProducts();
+        });
+        
+        console.log('\nТестовая отправка заказа...');
+        
+        if (savedProducts.length >= 2) {
+            const testOrder: IOrder = {
+                payment: 'card',
+                address: 'ул. Тестовая, д. 1',
+                email: 'order@test.com',
+                phone: '89990001122',
+                items: [savedProducts[0].id, savedProducts[1].id],
+                total: (savedProducts[0].price || 0) + (savedProducts[1].price || 0)
+            };
             
-            savedProducts.forEach((product, index) => {
-                console.log(`${index + 1}. ${product.title}`);
-                console.log(`   ID: ${product.id}`);
-                console.log(`   Категория: ${product.category}`);
-                console.log(`   Цена: ${product.price !== null ? product.price + '₽' : 'бесценно'}`);
-                console.log(`   Описание: ${product.description.substring(0, 50)}...`);
-                console.log('----------------------------------------');
-            });
-            
-            console.log('\nТестовая отправка заказа...');
-            
-            if (savedProducts.length >= 2) {
-                const testOrder: IOrder = {
-                    payment: 'card',
-                    address: 'ул. Тестовая, д. 1',
-                    email: 'order@test.com',
-                    phone: '89990001122',
-                    items: [savedProducts[0].id, savedProducts[1].id],
-                    total: (savedProducts[0].price || 0) + (savedProducts[1].price || 0)
-                };
-                
+            try {
                 const orderResult = await larekApi.sendOrder(testOrder);
-                
-                if (orderResult) {
-                    console.log('Заказ отправлен');
-                    console.log('ID заказа:', orderResult.id);
-                    console.log('Сумма заказа:', orderResult.total + '₽');
-                } else {
-                    console.log('Не удалось отправить заказ (сервер недоступен)');
-                }
+                console.log('Заказ отправлен');
+                console.log('ID заказа:', orderResult.id);
+                console.log('Сумма заказа:', orderResult.total + '₽');
+            } catch (orderError) {
+                console.log('Ошибка при отправке заказа:', orderError);
             }
-            
-        } else {
-            console.log('Сервер вернул пустой массив');
         }
         
     } catch (error) {
         console.log('Ошибка при запросе к серверу:', error);
-        console.log('Работаем в режиме офлайн-тестирования');
+        console.log('Не удалось загрузить товары');
     }
     
-    console.log('\n========== ТЕСТИРОВАНИЕ ЗАВЕРШЕНО ==========');
+    console.log('\n ТЕСТИРОВАНИЕ ЗАВЕРШЕНО');
 }
 
-testServerRequests();
+testServerRequests().catch(error => {
+    console.log('Ошибка при выполнении запросов:', error);
+});

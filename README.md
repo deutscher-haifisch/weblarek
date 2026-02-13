@@ -129,243 +129,83 @@ interface IBuyer {
 Модели данных
 У нас будет три класса, каждый отвечает за свою часть данных.
 
-1. Класс CatalogModel (каталог товаров)
-Хранит все товары и то, что выбрали для просмотра.
+### 1. Класс CatalogModel (Модель каталога товаров)
 
+**Назначение:**  
+Управляет данными каталога товаров. Отвечает за хранение массива всех доступных товаров, а также за выбор конкретного товара для просмотра в модальном окне.
 
-class CatalogModel {
-  private _products: IProduct[] = [];        // все товары
-  private _selectedCard: IProduct | null = null; // выбранный товар
+**Конструктор:**  
+`constructor()` — не принимает параметров, инициализирует пустой каталог.
 
-  constructor() {
-    // просто создаем пустой каталог
-  }
+**Поля класса:**
+- `_products: IProduct[]` — приватное поле, хранит массив всех товаров
+- `_selectedCard: IProduct | null` — приватное поле, хранит выбранный для просмотра товар
 
-  // сохранить товары с сервера
-  setProducts(products: IProduct[]): void {
-    this._products = products;
-  }
+**Методы:**
+- `setProducts(products: IProduct[]): void` — сохраняет массив товаров в модель
+- `getProducts(): IProduct[]` — возвращает весь массив товаров
+- `getProduct(id: string): IProduct | undefined` — возвращает товар по его идентификатору
+- `setSelectedCard(product: IProduct): void` — сохраняет выбранный товар
+- `getSelectedCard(): IProduct | null` — возвращает выбранный товар
 
-  // получить все товары
-  getProducts(): IProduct[] {
-    return this._products;
-  }
+---
 
-  // найти товар по id
-  getProduct(id: string): IProduct | undefined {
-    return this._products.find(product => product.id === id);
-  }
+### 2. Класс CartModel (Модель корзины)
 
-  // запомнить какой товар открыли
-  setSelectedCard(product: IProduct): void {
-    this._selectedCard = product;
-  }
+**Назначение:**  
+Управляет товарами, добавленными пользователем в корзину. Обеспечивает подсчет количества товаров, общей стоимости и проверку наличия.
 
-  // получить открытый товар
-  getSelectedCard(): IProduct | null {
-    return this._selectedCard;
-  }
-}
-Что тут происходит:
+**Конструктор:**  
+`constructor()` — не принимает параметров, инициализирует пустую корзину.
 
-_products - массив всех товаров с сервера
+**Поля класса:**
+- `_items: IProduct[]` — приватное поле, хранит массив товаров в корзине
 
-_selectedCard - товар, который сейчас смотрим в модалке
+**Методы:**
+- `getItems(): IProduct[]` — возвращает все товары в корзине
+- `addItem(product: IProduct): void` — добавляет товар в корзину (не добавляет бесценные товары)
+- `removeItem(productId: string): void` — удаляет товар из корзины по id
+- `clearCart(): void` — полностью очищает корзину
+- `getTotalPrice(): number` — возвращает общую стоимость товаров
+- `getItemCount(): number` — возвращает количество товаров в корзине
+- `hasItem(productId: string): boolean` — проверяет наличие товара в корзине
 
-методы просто получают/сохраняют данные
+---
 
-2. Класс CartModel (корзина)
-Здесь товары которые добавили в корзину.
+### 3. Класс BuyerModel (Модель покупателя)
 
-class CartModel {
-  private _items: IProduct[] = []; // товары в корзине
+**Назначение:**  
+Управляет персональными данными покупателя для оформления заказа. Обеспечивает частичное обновление полей и валидацию данных.
 
-  constructor() {}
+**Конструктор:**  
+`constructor()` — не принимает параметров, инициализирует все поля пустыми строками.
 
-  // что лежит в корзине
-  getItems(): IProduct[] {
-    return this._items;
-  }
+**Поля класса:**
+- `_payment: TPayment` — выбранный способ оплаты
+- `_address: string` — адрес доставки
+- `_email: string` — email покупателя
+- `_phone: string` — телефон покупателя
 
-  // добавить товар
-  addItem(product: IProduct): void {
-    // проверяем, есть ли уже такой и можно ли купить
-    if (product.price === null) {
-      console.log('бесценный товар нельзя добавить');
-      return;
-    }
-    if (!this.hasItem(product.id)) {
-      this._items.push(product);
-    }
-  }
+**Методы:**
+- `setData(data: Partial<IBuyer>): void` — частичное обновление данных
+- `getData(): IBuyer` — возвращает все данные покупателя
+- `clearData(): void` — очищает все поля
+- `validate(): TBuyerErrors` — проверяет заполненность полей, возвращает объект с ошибками
 
-  // удалить товар
-  removeItem(productId: string): void {
-    this._items = this._items.filter(item => item.id !== productId);
-  }
-
-  // очистить всю корзину
-  clearCart(): void {
-    this._items = [];
-  }
-
-  // общая сумма
-  getTotalPrice(): number {
-    return this._items.reduce((total, item) => total + (item.price || 0), 0);
-  }
-
-  // сколько товаров
-  getItemCount(): number {
-    return this._items.length;
-  }
-
-  // проверка есть ли товар в корзине
-  hasItem(productId: string): boolean {
-    return this._items.some(item => item.id === productId);
-  }
-}
-Что тут важно:
-
-бесценные товары (price = null) нельзя добавить в корзину
-
-сумма считается через reduce
-
-hasItem нужен чтобы не добавлять одно и то же два раза
-
-3. Класс BuyerModel (покупатель)
-Данные для доставки и оплаты.
-
-// типы для ошибок валидации
-interface IBuyerErrors {
-  payment?: string;
-  address?: string;
-  email?: string;
-  phone?: string;
-}
-
-class BuyerModel {
-  private _payment: TPayment = '';
-  private _address: string = '';
-  private _email: string = '';
-  private _phone: string = '';
-
-  constructor() {}
-
-  // обновить данные (можно частично)
-  setData(data: Partial<IBuyer>): void {
-    if (data.payment !== undefined) this._payment = data.payment;
-    if (data.address !== undefined) this._address = data.address;
-    if (data.email !== undefined) this._email = data.email;
-    if (data.phone !== undefined) this._phone = data.phone;
-  }
-
-  // получить все данные
-  getData(): IBuyer {
-    return {
-      payment: this._payment,
-      address: this._address,
-      email: this._email,
-      phone: this._phone
-    };
-  }
-
-  // очистить форму
-  clearData(): void {
-    this._payment = '';
-    this._address = '';
-    this._email = '';
-    this._phone = '';
-  }
-
-  // проверка заполненности полей
-  validate(): IBuyerErrors {
-    const errors: IBuyerErrors = {};
-
-    if (!this._payment) {
-      errors.payment = 'Выберите способ оплаты';
-    }
-    if (!this._address.trim()) {
-      errors.address = 'Введите адрес доставки';
-    }
-    if (!this._email.trim()) {
-      errors.email = 'Укажите email';
-    }
-    if (!this._phone.trim()) {
-      errors.phone = 'Введите номер телефона';
-    }
-
-    return errors;
-  }
-}
-Валидация:
-Проверка на пустые строки. Метод возвращает объект только с ошибками, если поле заполнено - его нет в объекте.
-
-Partial<IBuyer> - тип из TypeScript, позволяет передать не все поля, а только те которые хотим изменить.
-
-Как это все работает вместе
-Модели независимые, каждая занимается своим:
-
-CatalogModel - товары в магазине
-
-CartModel - что выбрал пользователь
-
-BuyerModel - данные покупателя
-
-// Пример использования:
-const catalog = new CatalogModel();
-catalog.setProducts(productsFromServer);
-const product = catalog.getProduct('123');
-
-const cart = new CartModel();
-cart.addItem(product);
-console.log(cart.getTotalPrice()); // сумма
-
-const buyer = new BuyerModel();
-buyer.setData({ address: 'ул. Ленина, 1', payment: 'card' });
-const errors = buyer.validate();
-if (Object.keys(errors).length === 0) {
-  // можно оформлять заказ
-}
 
 ## Слой коммуникации
 
-### Класс LarekApi
+### Класс LarekApi (Слой коммуникации)
 
-Отвечает за запросы к серверу. Использует базовый класс Api.
+**Назначение:**  
+Отвечает за взаимодействие с сервером. Использует базовый класс Api для отправки запросов.
 
-Конструктор:
+**Конструктор:**  
+`constructor(api: IApi)` — принимает экземпляр Api для выполнения запросов
 
-constructor(api: IApi) {
-    this._api = api;
-}
-Поля:
+**Поля класса:**
+- `_api: IApi` — приватное поле, хранит экземпляр Api
 
-_api: IApi — экземпляр Api для запросов
-
-Методы:
-
-Метод	Параметры	Возвращает	Описание
-getProductList	—	Promise<IProduct[]>	GET запрос на /product/, получает товары
-sendOrder	order: IOrder	Promise<IOrderResult | null>	POST запрос на /order/, отправляет заказ
-Интерфейсы для сервера
-
-// Ответ сервера со списком товаров
-interface IProductsResponse {
-    items: IProduct[];
-}
-
-// Данные для отправки заказа
-interface IOrder {
-    payment: TPayment;
-    address: string;
-    email: string;
-    phone: string;
-    items: string[];  // id товаров
-    total: number;    // общая сумма
-}
-
-// Ответ сервера после заказа
-interface IOrderResult {
-    id: string;      // номер заказа
-    total: number;   // итоговая сумма
-}
+**Методы:**
+- `getProductList(): Promise<IProduct[]>` — выполняет GET-запрос к эндпоинту `/product/` и возвращает массив товаров
+- `sendOrder(order: IOrder): Promise<IOrderResult>` — выполняет POST-запрос к эндпоинту `/order/` для отправки заказа

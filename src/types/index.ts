@@ -28,29 +28,23 @@ export interface IBuyer {
     phone: string;
 }
 
-// Интерфейс для ошибок валидации покупателя
-export interface IBuyerErrors {
-    payment?: string;
-    address?: string;
-    email?: string;
-    phone?: string;
-}
+
+// Тип для ошибок валидации покупателя
+export type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
+
 
 // ========== СЕРВЕР ==========
 
 // Ответ сервера со списком товаров
 export interface IProductsResponse {
     items: IProduct[];
+    total: number;
 }
 
 // Данные для отправки заказа
-export interface IOrder {
-    payment: TPayment;
-    address: string;
-    email: string;
-    phone: string;
-    items: string[];  // массив id товаров
+export interface IOrder extends IBuyer {
     total: number;
+    items: string[];
 }
 
 // Ответ сервера после отправки заказа

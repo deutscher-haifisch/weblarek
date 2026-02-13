@@ -1,4 +1,4 @@
-import { IBuyer, TPayment, IBuyerErrors } from '../../types/index';
+import { IBuyer, TPayment, TBuyerErrors } from '../../types/index';
 
 export class BuyerModel {
     private _payment: TPayment = '';
@@ -35,8 +35,8 @@ export class BuyerModel {
     }
 
     // валидация
-    validate(): IBuyerErrors {
-        const errors: IBuyerErrors = {};
+    validate(): TBuyerErrors {
+        const errors: TBuyerErrors = {};
 
         if (!this._payment) {
             errors.payment = 'Выберите способ оплаты';
@@ -54,20 +54,4 @@ export class BuyerModel {
         return errors;
     }
 
-    // отдельные геттеры (на всякий случай)
-    getPayment(): TPayment {
-        return this._payment;
-    }
-
-    getAddress(): string {
-        return this._address;
-    }
-
-    getEmail(): string {
-        return this._email;
-    }
-
-    getPhone(): string {
-        return this._phone;
-    }
 }
