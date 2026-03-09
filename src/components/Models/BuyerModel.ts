@@ -1,22 +1,25 @@
 import { IBuyer, TPayment, TBuyerErrors } from '../../types/index';
+import { EventEmitter } from '../base/Events';
 
 export class BuyerModel {
     private _payment: TPayment = '';
     private _address: string = '';
     private _email: string = '';
     private _phone: string = '';
+    protected events: EventEmitter;
 
-    constructor() {}
+    constructor(events: EventEmitter) {
+        this.events = events;
+    }
 
-    // частичное обновление данных
     setData(data: Partial<IBuyer>): void {
         if (data.payment !== undefined) this._payment = data.payment;
         if (data.address !== undefined) this._address = data.address;
         if (data.email !== undefined) this._email = data.email;
         if (data.phone !== undefined) this._phone = data.phone;
+        this.events.emit('buyer:changed', this.getData());
     }
 
-    // получить все данные
     getData(): IBuyer {
         return {
             payment: this._payment,
@@ -26,15 +29,14 @@ export class BuyerModel {
         };
     }
 
-    // очистить данные
     clearData(): void {
         this._payment = '';
         this._address = '';
         this._email = '';
         this._phone = '';
+        this.events.emit('buyer:changed', this.getData());
     }
 
-    // валидация
     validate(): TBuyerErrors {
         const errors: TBuyerErrors = {};
 
@@ -53,5 +55,4 @@ export class BuyerModel {
 
         return errors;
     }
-
 }

@@ -52,3 +52,39 @@ export interface IOrderResult {
     id: string;
     total: number;
 }
+
+// ========== ПРЕДСТАВЛЕНИЕ ==========
+
+// Действия для карточек (колбэки)
+export interface ICardActions {
+    onClick: (event: MouseEvent) => void;
+}
+
+// Состояние формы
+export interface IFormState {
+    valid: boolean;
+    errors: string[];
+}
+
+// Данные для отображения корзины
+export interface IBasketView {
+    items: HTMLElement[];
+    total: number;
+}
+
+// Данные для отображения страницы
+export interface IPageView {
+    catalog: HTMLElement[];
+    counter: number;
+    locked: boolean;
+}
+
+// Данные для модального окна
+export interface IModalData {
+    content: HTMLElement;
+}
+
+// Действия для окна успеха
+export interface ISuccessActions {
+    onClick: () => void;
+}

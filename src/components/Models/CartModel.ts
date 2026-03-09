@@ -1,16 +1,18 @@
 import { IProduct } from '../../types/index';
+import { EventEmitter } from '../base/Events';
 
 export class CartModel {
     private _items: IProduct[] = [];
+    protected events: EventEmitter;
 
-    constructor() {}
+    constructor(events: EventEmitter) {
+        this.events = events;
+    }
 
-    // получить все товары в корзине
     getItems(): IProduct[] {
         return this._items;
     }
 
-    // добавить товар в корзину
     addItem(product: IProduct): void {
         if (product.price === null) {
             console.log('Этот товар нельзя добавить в корзину (бесценный)');
@@ -18,30 +20,31 @@ export class CartModel {
         }
         if (!this.hasItem(product.id)) {
             this._items.push(product);
+            this.events.emit('cart:changed', { items: this._items });
         }
     }
 
-    // удалить товар из корзины
     removeItem(productId: string): void {
+        const initialLength = this._items.length;
         this._items = this._items.filter(item => item.id !== productId);
+        if (this._items.length !== initialLength) {
+            this.events.emit('cart:changed', { items: this._items });
+        }
     }
 
-    // очистить корзину
     clearCart(): void {
         this._items = [];
+        this.events.emit('cart:changed', { items: this._items });
     }
 
-    // общая сумма товаров
     getTotalPrice(): number {
         return this._items.reduce((sum, item) => sum + (item.price || 0), 0);
     }
 
-    // количество товаров
     getItemCount(): number {
         return this._items.length;
     }
 
-    // проверить наличие товара в корзине
     hasItem(productId: string): boolean {
         return this._items.some(item => item.id === productId);
     }
