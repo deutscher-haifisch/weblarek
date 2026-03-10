@@ -19,8 +19,11 @@ export class Modal extends Component<IModalData> {
         });
     }
 
-    set content(value: HTMLElement) {
-        this._content.replaceChildren(value);
+    set content(value: HTMLElement | null) {
+        this._content.replaceChildren();
+        if (value) {
+            this._content.appendChild(value);
+        }
     }
 
     open() {
@@ -30,7 +33,7 @@ export class Modal extends Component<IModalData> {
 
     close() {
         this.container.classList.remove('modal_active');
-        this._content.replaceChildren(); // очищаем содержимое, не вызывая сеттер
+        this.content = null; 
         this.events.emit('modal:close');
     }
 

@@ -1,11 +1,11 @@
 import { IProduct } from '../../types/index';
-import { EventEmitter } from '../base/Events';
+import { IEvents } from '../../types/index';
 
 export class CartModel {
     private _items: IProduct[] = [];
-    protected events: EventEmitter;
+    protected events: IEvents;
 
-    constructor(events: EventEmitter) {
+    constructor(events: IEvents) {
         this.events = events;
     }
 
@@ -14,13 +14,10 @@ export class CartModel {
     }
 
     addItem(product: IProduct): void {
-        if (product.price === null) {
-            console.log('Этот товар нельзя добавить в корзину (бесценный)');
-            return;
-        }
+        if (product.price === null) return;
         if (!this.hasItem(product.id)) {
             this._items.push(product);
-            this.events.emit('cart:changed', { items: this._items });
+            this.events.emit('cart:changed'); // данные убраны
         }
     }
 
@@ -28,13 +25,13 @@ export class CartModel {
         const initialLength = this._items.length;
         this._items = this._items.filter(item => item.id !== productId);
         if (this._items.length !== initialLength) {
-            this.events.emit('cart:changed', { items: this._items });
+            this.events.emit('cart:changed'); // данные убраны
         }
     }
 
     clearCart(): void {
         this._items = [];
-        this.events.emit('cart:changed', { items: this._items });
+        this.events.emit('cart:changed'); // данные убраны
     }
 
     getTotalPrice(): number {

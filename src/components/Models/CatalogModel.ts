@@ -1,22 +1,19 @@
 import { IProduct } from '../../types/index';
-import { EventEmitter } from '../base/Events';
+import { IEvents } from '../../types/index';
 
 export class CatalogModel {
     private _products: IProduct[] = [];
     private _selectedCard: IProduct | null = null;
-    protected events: EventEmitter;
+    protected events: IEvents; 
 
-    constructor(events: EventEmitter) {
+    constructor(events: IEvents) {
         this.events = events;
     }
 
-setProducts(products: IProduct[]): void {
-    console.log('2. setProducts вызван, получено товаров:', products.length);
-    this._products = products;
-    console.log('3. Товары сохранены в _products, длина:', this._products.length);
-    this.events.emit('catalog:changed');
-    console.log('4. Событие catalog:changed отправлено');
-}
+    setProducts(products: IProduct[]): void {
+        this._products = products;
+        this.events.emit('catalog:changed'); 
+    }
 
     getProducts(): IProduct[] {
         return this._products;
@@ -28,7 +25,7 @@ setProducts(products: IProduct[]): void {
 
     setSelectedCard(product: IProduct | null): void {
         this._selectedCard = product;
-        this.events.emit('card:selected', { product: this._selectedCard });
+        this.events.emit('card:selected');
     }
 
     getSelectedCard(): IProduct | null {

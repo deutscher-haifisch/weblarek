@@ -1,14 +1,15 @@
 import { IBuyer, TPayment, TBuyerErrors } from '../../types/index';
-import { EventEmitter } from '../base/Events';
+import { IEvents } from '../../types/index';
 
 export class BuyerModel {
     private _payment: TPayment = '';
     private _address: string = '';
     private _email: string = '';
     private _phone: string = '';
-    protected events: EventEmitter;
+    private _step: 'order' | 'contacts' | null = null; // текущий шаг
+    protected events: IEvents;
 
-    constructor(events: EventEmitter) {
+    constructor(events: IEvents) {
         this.events = events;
     }
 
@@ -17,7 +18,7 @@ export class BuyerModel {
         if (data.address !== undefined) this._address = data.address;
         if (data.email !== undefined) this._email = data.email;
         if (data.phone !== undefined) this._phone = data.phone;
-        this.events.emit('buyer:changed', this.getData());
+        this.events.emit('buyer:changed');
     }
 
     getData(): IBuyer {
@@ -34,7 +35,8 @@ export class BuyerModel {
         this._address = '';
         this._email = '';
         this._phone = '';
-        this.events.emit('buyer:changed', this.getData());
+        this._step = null; 
+        this.events.emit('buyer:changed');
     }
 
     validate(): TBuyerErrors {
@@ -54,5 +56,13 @@ export class BuyerModel {
         }
 
         return errors;
+    }
+
+    setStep(step: 'order' | 'contacts' | null): void {
+        this._step = step;
+    }
+
+    getStep(): 'order' | 'contacts' | null {
+        return this._step;
     }
 }

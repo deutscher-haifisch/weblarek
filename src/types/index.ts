@@ -5,6 +5,13 @@ export interface IApi {
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
+// Базовый интерфейс для брокера событий
+export interface IEvents {
+    on<T extends object>(event: string, callback: (data: T) => void): void;
+    emit<T extends object>(event: string, data?: T): void;
+    trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void;
+}
+
 // ДОБАВЛЯЕМ НАШИ ИНТЕРФЕЙСЫ:
 
 // Тип для способа оплаты
