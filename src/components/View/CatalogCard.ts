@@ -8,16 +8,18 @@ export class CatalogCard extends Card<IProduct> {
     protected _button: HTMLButtonElement | null;
 
     constructor(container: HTMLElement, actions?: { onClick: (event: MouseEvent) => void }) {
-        super(container, actions); 
+        super(container);
         this._image = container.querySelector('.card__image');
         this._category = container.querySelector('.card__category');
         this._button = container.querySelector('.card__button');
+
+        if (actions?.onClick) {
+            container.addEventListener('click', actions.onClick);
+        }
     }
 
     set image(value: string) {
-        if (this._image) {
-            this.setImage(this._image, value, this.title);
-        }
+        if (this._image) this.setImage(this._image, value, this.title);
     }
 
     set category(value: string) {

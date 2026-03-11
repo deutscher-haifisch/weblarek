@@ -6,7 +6,7 @@ export class BasketCard extends Card<IProduct> {
     protected _deleteButton: HTMLButtonElement | null;
 
     constructor(container: HTMLElement, actions?: { onClick: (event: MouseEvent) => void }) {
-        super(container); // НЕ передаём actions
+        super(container);
         this._index = container.querySelector('.basket__item-index');
         this._deleteButton = container.querySelector('.basket__item-delete');
 

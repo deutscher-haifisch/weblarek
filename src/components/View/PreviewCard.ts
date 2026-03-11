@@ -9,7 +9,7 @@ export class PreviewCard extends Card<IProduct> {
     private _priceValue: number | null = null;
 
     constructor(container: HTMLElement, actions?: { onClick: (event: MouseEvent) => void }) {
-        super(container); // НЕ передаём actions
+        super(container);
         this._image = container.querySelector('.card__image');
         this._category = container.querySelector('.card__category');
         this._description = container.querySelector('.card__text');

@@ -6,7 +6,6 @@ export class BuyerModel {
     private _address: string = '';
     private _email: string = '';
     private _phone: string = '';
-    private _step: 'order' | 'contacts' | null = null; // текущий шаг
     protected events: IEvents;
 
     constructor(events: IEvents) {
@@ -35,34 +34,15 @@ export class BuyerModel {
         this._address = '';
         this._email = '';
         this._phone = '';
-        this._step = null; 
         this.events.emit('buyer:changed');
     }
 
     validate(): TBuyerErrors {
         const errors: TBuyerErrors = {};
-
-        if (!this._payment) {
-            errors.payment = 'Выберите способ оплаты';
-        }
-        if (!this._address.trim()) {
-            errors.address = 'Введите адрес доставки';
-        }
-        if (!this._email.trim()) {
-            errors.email = 'Укажите email';
-        }
-        if (!this._phone.trim()) {
-            errors.phone = 'Введите номер телефона';
-        }
-
+        if (!this._payment) errors.payment = 'Выберите способ оплаты';
+        if (!this._address.trim()) errors.address = 'Введите адрес доставки';
+        if (!this._email.trim()) errors.email = 'Укажите email';
+        if (!this._phone.trim()) errors.phone = 'Введите номер телефона';
         return errors;
-    }
-
-    setStep(step: 'order' | 'contacts' | null): void {
-        this._step = step;
-    }
-
-    getStep(): 'order' | 'contacts' | null {
-        return this._step;
     }
 }
